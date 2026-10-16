@@ -53,7 +53,7 @@ class FakeOpener:
 
 def test_client_urls_and_cache():
     op = FakeOpener()
-    c = OpcoesNetClient(opener=op)
+    c = OpcoesNetClient(opener=op, cache_dir=None, sleep=lambda s: None)
     c.expirations("PETR4")
     c.chain("PETR4", dt.date(2026, 11, 20), "call")
     c.chain("PETR4", dt.date(2026, 11, 20), "put")  # cached
@@ -78,7 +78,7 @@ class FakeTicker:
 @pytest.fixture
 def provider(monkeypatch):
     def make(fail=False):
-        p = YahooProvider(OpcoesNetClient(opener=FakeOpener(fail)))
+        p = YahooProvider(OpcoesNetClient(opener=FakeOpener(fail), cache_dir=None, sleep=lambda s: None))
         monkeypatch.setattr(p._yf, "Ticker", FakeTicker)
         p._rates["BR"] = 0.13
         return p
@@ -105,3 +105,53 @@ def test_falls_back_to_grid_when_site_unreachable(provider):
     assert len(p.notes) == 1 and "opcoes.net.br" in p.notes[0]
     p.reset_notes()
     assert p.notes == []
+
+
+class RateLimitedOpener(FakeOpener):
+    """Returns 429 for the first `n` requests."""
+
+    def __init__(self, n, retry_after="2"):
+        super().__init__()
+        self.n, self.retry_after = n, retry_after
+
+    def __call__(self, req, timeout):
+        import urllib.error
+        from email.message import Message
+
+        if self.n > 0:
+            self.n -= 1
+            self.urls.append(req.full_url)
+            h = Message()
+            if self.retry_after:
+                h["Retry-After"] = self.retry_after
+            raise urllib.error.HTTPError(req.full_url, 429, "Too Many Requests", h, None)
+        return super().__call__(req, timeout)
+
+
+def test_retries_429_with_retry_after_and_throttles():
+    sleeps, now = [], [0.0]
+    op = RateLimitedOpener(2)
+    c = OpcoesNetClient(opener=op, cache_dir=None, sleep=lambda s: (sleeps.append(s), now.__setitem__(0, now[0] + s)),
+                        clock=lambda: now[0], min_interval=1.5)
+    assert c.expirations("BBSE3")
+    assert len(op.urls) == 3
+    assert sleeps.count(2.0) == 2  # honoured Retry-After twice
+
+
+def test_gives_up_after_max_retries():
+    import urllib.error
+
+    c = OpcoesNetClient(opener=RateLimitedOpener(10, retry_after=None), cache_dir=None, sleep=lambda s: None,
+                        max_retries=2)
+    with pytest.raises(urllib.error.HTTPError):
+        c.expirations("BBSE3")
+
+
+def test_disk_cache_survives_new_client(tmp_path):
+    op = FakeOpener()
+    OpcoesNetClient(opener=op, cache_dir=tmp_path, sleep=lambda s: None).expirations("WEGE3")
+    op2 = FakeOpener(fail=True)
+    assert OpcoesNetClient(opener=op2, cache_dir=tmp_path, sleep=lambda s: None).expirations("WEGE3")
+    assert op2.urls == []
+    stale = OpcoesNetClient(opener=FakeOpener(), cache_dir=tmp_path, cache_ttl=-1, sleep=lambda s: None)
+    stale.expirations("WEGE3")  # expired cache -> refetch
