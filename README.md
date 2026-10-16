@@ -23,13 +23,16 @@ Local web app that prices options on your portfolio and compares fair value to t
   a single window or set a manual override in Settings. Market IV is shown next to it — the comparison is
   essentially *market implied vol vs. your realized-vol estimate*.
 
-### Run
-```bash
-pip install -r requirements.txt
-python -m optionsapp.app            # live data from Yahoo Finance (yfinance)
-python -m optionsapp.app --demo     # offline synthetic data
-```
-Open http://127.0.0.1:5000. Holdings, watchlist and settings are saved to `data/portfolio.json`
+### Install & run
+Requires Python 3.10+ (https://www.python.org/downloads/).
+
+- **macOS / Linux:** `./start.sh`
+- **Windows:** double-click `start.bat`
+
+The first run creates a `.venv` and installs dependencies; later runs start straight away. The app opens at
+http://127.0.0.1:5000 with live Yahoo Finance data. Append `--demo` for offline synthetic data. Stop it with Ctrl+C.
+
+Manual alternative: `pip install -r requirements.txt && python -m optionsapp.app`. Holdings, watchlist and settings are saved to `data/portfolio.json`
 (git-ignored); statements never leave your machine. Market quotes come from Yahoo Finance and may be
 delayed — use for analysis, not order execution.
 
@@ -41,5 +44,5 @@ If a statement doesn't parse, export positions as CSV or edit holdings manually 
 
 ### Tests
 ```bash
-python -m pytest -q
+pip install pytest && python -m pytest -q
 ```
