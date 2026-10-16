@@ -1,0 +1,177 @@
+{
+  "holdings": [
+    {
+      "ticker": "BRK.B",
+      "quantity": 18,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "GOOGL",
+      "quantity": 18,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "AAPL",
+      "quantity": 18,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "AMZN",
+      "quantity": 11,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "JPM",
+      "quantity": 7,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "NVDA",
+      "quantity": 7,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "META",
+      "quantity": 2,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "TSM",
+      "quantity": 3,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "NVDA",
+      "quantity": 70,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "GOOGL",
+      "quantity": 40,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "AMZN",
+      "quantity": 38,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "AAPL",
+      "quantity": 23,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "MSFT",
+      "quantity": 13,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "FIG",
+      "quantity": 15,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "BPAC11",
+      "quantity": 1600,
+      "avg_price": null,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "TOTS3",
+      "quantity": 600,
+      "avg_price": null,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "BRAV3",
+      "quantity": 322,
+      "avg_price": null,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "WEGE3",
+      "quantity": 600,
+      "avg_price": null,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "acao",
+      "name": ""
+    },
+    {
+      "ticker": "BBSE3",
+      "quantity": 700,
+      "avg_price": null,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "acao",
+      "name": ""
+    }
+  ],
+  "options": [],
+  "updated_at": "2026-10-16T02:58:10"
+}

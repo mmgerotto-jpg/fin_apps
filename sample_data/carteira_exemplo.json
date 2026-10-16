@@ -1,0 +1,79 @@
+{
+  "holdings": [
+    {
+      "ticker": "PETR4",
+      "quantity": 800,
+      "avg_price": 31.2,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "acao",
+      "name": "PETROBRAS PN"
+    },
+    {
+      "ticker": "VALE3",
+      "quantity": 300,
+      "avg_price": 66.0,
+      "market": "BR",
+      "broker": "XP Investimentos",
+      "asset_type": "acao",
+      "name": "VALE ON"
+    },
+    {
+      "ticker": "BOVA11",
+      "quantity": 150,
+      "avg_price": 118.0,
+      "market": "BR",
+      "broker": "XP Investimentos",
+      "asset_type": "etf",
+      "name": "ISHARES BOVA"
+    },
+    {
+      "ticker": "XPML11",
+      "quantity": 100,
+      "avg_price": 105.0,
+      "market": "BR",
+      "broker": "XP Investimentos",
+      "asset_type": "fii",
+      "name": "XP MALLS FII"
+    },
+    {
+      "ticker": "PETR4",
+      "quantity": 200,
+      "avg_price": 35.0,
+      "market": "BR",
+      "broker": "XP Investimentos",
+      "asset_type": "acao",
+      "name": "PETROBRAS PN"
+    },
+    {
+      "ticker": "AAPL",
+      "quantity": 250,
+      "avg_price": 150.0,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": "Apple Inc"
+    },
+    {
+      "ticker": "NVDA",
+      "quantity": 120,
+      "avg_price": 40.0,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": "NVIDIA Corp"
+    }
+  ],
+  "options": [
+    {
+      "underlying": "PETR4",
+      "kind": "call",
+      "quantity": -500,
+      "strike": 40.0,
+      "expiry": "2026-11-20",
+      "broker": "BTG Pactual",
+      "description": "PETRK400 lançada"
+    }
+  ],
+  "updated_at": "2026-10-16T02:54:48"
+}

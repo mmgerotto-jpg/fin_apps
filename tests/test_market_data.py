@@ -35,12 +35,26 @@ def provider(monkeypatch):
 
 def test_yahoo_mapping(provider):
     assert provider.spot("BRK.B") == 200.0
-    assert provider._tickers.keys() == {"BRK-B"}
+    assert provider.spot("PETR4") == 200.0
+    assert set(provider._tickers) == {"BRK-B", "PETR4.SA"}
+    assert provider.chain("PETR4", dt.date(2026, 11, 20), "call") is None
+    assert all(e.weekday() == 4 for e in provider.expirations("PETR4"))
     assert provider.expirations("AAPL") == [dt.date(2026, 11, 20), dt.date(2026, 12, 18)]
     calls = provider.chain("AAPL", dt.date(2026, 11, 20), "call")
     assert list(calls.columns) == CHAIN_COLUMNS
     assert calls.iloc[0]["volume"] == 0 and calls.iloc[0]["ask"] == 3.2
     assert provider.chain("AAPL", dt.date(2026, 11, 20), "put").empty
-    assert provider.risk_free_rate() == pytest.approx(0.043)
+    assert provider.risk_free_rate("US") == pytest.approx(0.043)
     assert 0.005 < provider.dividend_yield("AAPL") <= 0.01  # ~1.5-2.0 / 200
     assert len(provider.history("AAPL")) == 3
+
+
+def test_selic_from_banco_central(provider, monkeypatch):
+    import math
+
+    from options_app import market_data
+
+    monkeypatch.setattr(market_data, "fetch_selic", lambda: 0.15)
+    assert provider.risk_free_rate("BR") == pytest.approx(math.log1p(0.15))
+    monkeypatch.setattr(market_data, "fetch_selic", lambda: 0.0)  # cached per market
+    assert provider.risk_free_rate("BR") == pytest.approx(math.log1p(0.15))
