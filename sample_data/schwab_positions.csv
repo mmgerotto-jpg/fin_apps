@@ -1,0 +1,9 @@
+"Positions for account Individual ...123 as of 10:15 AM ET, 10/16/2026"
+
+"Symbol","Description","Quantity","Price","Price Change %","Price Change $","Market Value","Day Change %","Day Change $","Cost Basis","Gain/Loss %","Gain/Loss $","Security Type"
+"AAPL","APPLE INC","300","$230.00","0.5%","$1.15","$69,000.00","0.5%","$345.00","$45,000.00","53.33%","$24,000.00","Equity"
+"MSFT","MICROSOFT CORP","150","$430.00","-0.2%","-$0.86","$64,500.00","-0.2%","-$129.00","$52,500.00","22.86%","$12,000.00","Equity"
+"KO","COCA-COLA CO","200","$68.00","0.1%","$0.07","$13,600.00","0.1%","$14.00","$11,000.00","23.64%","$2,600.00","Equity"
+"AAPL 11/20/2026 260.00 C","CALL APPLE INC $260 EXP 11/20/26","-1","$2.10","","","-$210.00","","","-$300.00","","","Option"
+"Cash & Cash Investments","--","--","--","--","--","$5,000.00","0%","$0.00","--","--","--","Cash and Money Market"
+"Account Total","--","--","--","--","--","$151,890.00","","","","","",""
