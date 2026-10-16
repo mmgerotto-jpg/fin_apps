@@ -28,6 +28,7 @@ class Holding:
     broker: str = ""
     asset_type: str = "acao"
     name: str = ""
+    lent: float = 0.0  # shares lent out (aluguel/BTC doador): not available to cover calls
 
     def __post_init__(self):
         self.ticker = normalize_ticker(self.ticker)
@@ -91,7 +92,7 @@ class Portfolio:
         for h in self.holdings:
             k = (h.ticker, h.market)
             if k not in merged:
-                merged[k] = Holding(h.ticker, h.quantity, h.avg_price, h.market, h.broker, h.asset_type, h.name)
+                merged[k] = Holding(h.ticker, h.quantity, h.avg_price, h.market, h.broker, h.asset_type, h.name, h.lent)
                 continue
             m = merged[k]
             if m.avg_price is not None and h.avg_price is not None and (m.quantity + h.quantity):
@@ -99,6 +100,7 @@ class Portfolio:
             elif m.avg_price is None:
                 m.avg_price = h.avg_price
             m.quantity += h.quantity
+            m.lent += h.lent
             if h.broker and h.broker not in m.broker.split(", "):
                 m.broker = f"{m.broker}, {h.broker}" if m.broker else h.broker
             m.name = m.name or h.name
@@ -122,7 +124,7 @@ class Portfolio:
         )
 
 
-HOLDING_COLUMNS = ["ticker", "quantity", "avg_price", "market", "broker", "asset_type", "name"]
+HOLDING_COLUMNS = ["ticker", "quantity", "avg_price", "lent", "market", "broker", "asset_type", "name"]
 
 
 def holdings_to_frame(holdings: list[Holding]) -> pd.DataFrame:
@@ -147,6 +149,7 @@ def frame_to_holdings(df: pd.DataFrame) -> list[Holding]:
                 str(r.get("broker") or "").replace("nan", ""),
                 asset_type if asset_type in ASSET_TYPES else "acao",
                 str(r.get("name") or "").replace("nan", ""),
+                parse_number(r.get("lent")) or 0.0,
             )
         )
     return out

@@ -136,3 +136,11 @@ def test_vol_estimators():
     for m in ("historical", "ewma", "blend"):
         assert 0.15 < estimate_vol(closes, m) < 0.5
     assert historical_vol(closes.head(5)) is None
+
+
+def test_lent_shares_do_not_cover_calls():
+    s = Settings(vol_override={"XYZ": 0.30})
+    df, _ = call_opportunities([Holding("XYZ", 700, market="US", lent=200)], FlatProvider(), s, TODAY)
+    assert (df["contracts"] == 5).all()
+    df, warns = call_opportunities([Holding("XYZ", 200, market="US", lent=200)], FlatProvider(), s, TODAY)
+    assert df.empty and "200 em aluguel" in warns[0]

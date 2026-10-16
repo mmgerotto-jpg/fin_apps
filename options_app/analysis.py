@@ -163,10 +163,11 @@ def call_opportunities(
     for h in holdings:
         if h.asset_type not in OPTIONABLE_TYPES:
             continue
-        free = h.quantity - committed_shares.get(h.ticker, 0.0)
+        free = h.quantity - committed_shares.get(h.ticker, 0.0) - h.lent
         contracts = int(free // LOT)
         if contracts < 1:
-            warnings.append(f"{h.ticker}: {free:g} ações livres, menos que 1 lote de {LOT}")
+            lent = f" ({h.lent:g} em aluguel)" if h.lent else ""
+            warnings.append(f"{h.ticker}: {free:g} ações livres{lent}, menos que 1 lote de {LOT}")
             continue
         try:
             ctx = stock_context(h.ticker, provider, settings, h.market)

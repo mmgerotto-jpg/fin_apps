@@ -23,8 +23,8 @@ class FakeClient:
 SAMPLE = StatementExtraction(
     broker="BTG Pactual",
     statement_date="2026-10-15",
-    holdings=[ExtractedHolding(ticker="PETR4", name="PETROBRAS PN", asset_type="acao", market="BR", quantity=800, avg_price=31.2),
-              ExtractedHolding(ticker="BOVA11", name="ISHARES BOVA", asset_type="etf", market="BR", quantity=100, avg_price=None)],
+    holdings=[ExtractedHolding(ticker="PETR4", name="PETROBRAS PN", asset_type="acao", market="BR", quantity=800, avg_price=31.2, lent=200),
+              ExtractedHolding(ticker="BOVA11", name="ISHARES BOVA", asset_type="etf", market="BR", quantity=100, avg_price=None, lent=0)],
     options=[ExtractedOption(underlying="PETR4", kind="call", strike=40.0, expiry="2026-11-20", quantity_shares=-500, description="PETRK400")],
     notes=["CDB ignorado"],
 )
@@ -40,6 +40,7 @@ def test_pdf_request_shape_and_conversion():
     assert "BTG Pactual" in kw["messages"][0]["content"][-1]["text"]
     holdings, options = to_portfolio_items(ex, "BTG Pactual")
     assert [(h.ticker, h.quantity, h.broker) for h in holdings] == [("PETR4", 800, "BTG Pactual"), ("BOVA11", 100, "BTG Pactual")]
+    assert holdings[0].lent == 200
     assert options[0].quantity == -500 and options[0].kind == "call"
 
 

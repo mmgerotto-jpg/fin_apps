@@ -1,103 +1,84 @@
 {
   "holdings": [
     {
-      "ticker": "BRK.B",
-      "quantity": 18,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Nomad",
+      "ticker": "BBSE3",
+      "quantity": 700,
+      "avg_price": 35.46,
+      "market": "BR",
+      "broker": "BTG Pactual",
       "asset_type": "acao",
-      "name": ""
+      "name": "BB SEGURIDADE ON",
+      "lent": 200
     },
     {
-      "ticker": "GOOGL",
-      "quantity": 18,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Nomad",
+      "ticker": "BPAC11",
+      "quantity": 1600,
+      "avg_price": 44.89,
+      "market": "BR",
+      "broker": "BTG Pactual",
       "asset_type": "acao",
-      "name": ""
+      "name": "BTG PACTUAL UNT",
+      "lent": 0.0
     },
     {
-      "ticker": "AAPL",
-      "quantity": 18,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Nomad",
+      "ticker": "BRAV3",
+      "quantity": 322,
+      "avg_price": 23.08,
+      "market": "BR",
+      "broker": "BTG Pactual",
       "asset_type": "acao",
-      "name": ""
+      "name": "BRAVA ON",
+      "lent": 0.0
     },
     {
-      "ticker": "AMZN",
-      "quantity": 11,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Nomad",
+      "ticker": "TOTS3",
+      "quantity": 600,
+      "avg_price": 37.24,
+      "market": "BR",
+      "broker": "BTG Pactual",
       "asset_type": "acao",
-      "name": ""
+      "name": "TOTVS ON",
+      "lent": 0.0
     },
     {
-      "ticker": "JPM",
-      "quantity": 7,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Nomad",
+      "ticker": "WEGE3",
+      "quantity": 600,
+      "avg_price": 39.68,
+      "market": "BR",
+      "broker": "BTG Pactual",
       "asset_type": "acao",
-      "name": ""
+      "name": "WEG ON",
+      "lent": 200
     },
     {
-      "ticker": "NVDA",
-      "quantity": 7,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Nomad",
-      "asset_type": "acao",
-      "name": ""
+      "ticker": "GOGL34",
+      "quantity": 600,
+      "avg_price": 46.93,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "bdr",
+      "name": "ALPHABET DRN",
+      "lent": 0.0
     },
     {
-      "ticker": "META",
-      "quantity": 2,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Nomad",
-      "asset_type": "acao",
-      "name": ""
+      "ticker": "MELI34",
+      "quantity": 200,
+      "avg_price": 100.91,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "bdr",
+      "name": "MERCADOLIBRE DRN",
+      "lent": 200
     },
     {
-      "ticker": "TSM",
-      "quantity": 3,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Nomad",
-      "asset_type": "acao",
-      "name": ""
-    },
-    {
-      "ticker": "NVDA",
-      "quantity": 70,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Avenue",
-      "asset_type": "acao",
-      "name": ""
-    },
-    {
-      "ticker": "GOOGL",
-      "quantity": 40,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Avenue",
-      "asset_type": "acao",
-      "name": ""
-    },
-    {
-      "ticker": "AMZN",
-      "quantity": 38,
-      "avg_price": null,
-      "market": "US",
-      "broker": "Avenue",
-      "asset_type": "acao",
-      "name": ""
+      "ticker": "VISA34",
+      "quantity": 140,
+      "avg_price": 82.05,
+      "market": "BR",
+      "broker": "BTG Pactual",
+      "asset_type": "bdr",
+      "name": "VISA DRN",
+      "lent": 0.0
     },
     {
       "ticker": "AAPL",
@@ -106,16 +87,38 @@
       "market": "US",
       "broker": "Avenue",
       "asset_type": "acao",
-      "name": ""
+      "name": "Apple Inc",
+      "lent": 0.0
     },
     {
-      "ticker": "MSFT",
-      "quantity": 13,
+      "ticker": "AMZN",
+      "quantity": 38,
       "avg_price": null,
       "market": "US",
       "broker": "Avenue",
       "asset_type": "acao",
-      "name": ""
+      "name": "Amazon.com Inc",
+      "lent": 0.0
+    },
+    {
+      "ticker": "GOOGL",
+      "quantity": 40,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": "Alphabet Inc Class A",
+      "lent": 0.0
+    },
+    {
+      "ticker": "NVDA",
+      "quantity": 70,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Avenue",
+      "asset_type": "acao",
+      "name": "NVIDIA Corp",
+      "lent": 0.0
     },
     {
       "ticker": "FIG",
@@ -124,54 +127,110 @@
       "market": "US",
       "broker": "Avenue",
       "asset_type": "acao",
-      "name": ""
+      "name": "Figma Inc",
+      "lent": 0.0
     },
     {
-      "ticker": "BPAC11",
-      "quantity": 1600,
+      "ticker": "MSFT",
+      "quantity": 13,
       "avg_price": null,
-      "market": "BR",
-      "broker": "BTG Pactual",
+      "market": "US",
+      "broker": "Avenue",
       "asset_type": "acao",
-      "name": ""
+      "name": "Microsoft Corp",
+      "lent": 0.0
     },
     {
-      "ticker": "TOTS3",
-      "quantity": 600,
+      "ticker": "AAPL",
+      "quantity": 18,
       "avg_price": null,
-      "market": "BR",
-      "broker": "BTG Pactual",
+      "market": "US",
+      "broker": "Nomad",
       "asset_type": "acao",
-      "name": ""
+      "name": "Apple Inc",
+      "lent": 0.0
     },
     {
-      "ticker": "BRAV3",
-      "quantity": 322,
+      "ticker": "AMZN",
+      "quantity": 11,
       "avg_price": null,
-      "market": "BR",
-      "broker": "BTG Pactual",
+      "market": "US",
+      "broker": "Nomad",
       "asset_type": "acao",
-      "name": ""
+      "name": "Amazon.com Inc",
+      "lent": 0.0
     },
     {
-      "ticker": "WEGE3",
-      "quantity": 600,
+      "ticker": "BRK.B",
+      "quantity": 17,
       "avg_price": null,
-      "market": "BR",
-      "broker": "BTG Pactual",
+      "market": "US",
+      "broker": "Nomad",
       "asset_type": "acao",
-      "name": ""
+      "name": "Berkshire Hathaway B",
+      "lent": 0.0
     },
     {
-      "ticker": "BBSE3",
-      "quantity": 700,
+      "ticker": "GOOGL",
+      "quantity": 18,
       "avg_price": null,
-      "market": "BR",
-      "broker": "BTG Pactual",
+      "market": "US",
+      "broker": "Nomad",
       "asset_type": "acao",
-      "name": ""
+      "name": "Alphabet Inc Class A",
+      "lent": 0.0
+    },
+    {
+      "ticker": "IBIT",
+      "quantity": 37.34557,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "etf",
+      "name": "iShares Bitcoin Trust ETF",
+      "lent": 0.0
+    },
+    {
+      "ticker": "JPM",
+      "quantity": 7,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": "JPMorgan Chase",
+      "lent": 0.0
+    },
+    {
+      "ticker": "META",
+      "quantity": 2,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": "Meta Platforms",
+      "lent": 0.0
+    },
+    {
+      "ticker": "NVDA",
+      "quantity": 7,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": "NVIDIA Corp",
+      "lent": 0.0
+    },
+    {
+      "ticker": "TSM",
+      "quantity": 3,
+      "avg_price": null,
+      "market": "US",
+      "broker": "Nomad",
+      "asset_type": "acao",
+      "name": "Taiwan Semiconductor ADS",
+      "lent": 0.0
     }
   ],
   "options": [],
-  "updated_at": "2026-10-16T02:58:10"
+  "updated_at": "2026-10-16T03:06:08"
 }

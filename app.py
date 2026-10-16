@@ -225,6 +225,8 @@ with tab_wallet:
             "ticker": st.column_config.TextColumn("Ativo"),
             "quantity": st.column_config.NumberColumn("Quantidade", format="%.0f"),
             "avg_price": st.column_config.NumberColumn("Preço médio", format="%.2f"),
+            "lent": st.column_config.NumberColumn("Em aluguel", format="%.0f",
+                                                  help="Ações emprestadas (BTC doador): não cobrem calls"),
             "market": st.column_config.SelectboxColumn("Mercado", options=[BR, US]),
             "broker": st.column_config.TextColumn("Corretora"),
             "asset_type": st.column_config.SelectboxColumn("Tipo", options=ASSET_TYPES),
@@ -254,7 +256,7 @@ with tab_wallet:
     if p.holdings:
         st.markdown("**Consolidado por ativo**")
         cons = holdings_to_frame(p.consolidated()).rename(columns={
-            "ticker": "Ativo", "quantity": "Quantidade", "avg_price": "Preço médio", "market": "Mercado",
+            "ticker": "Ativo", "quantity": "Quantidade", "avg_price": "Preço médio", "lent": "Em aluguel", "market": "Mercado",
             "broker": "Corretoras", "asset_type": "Tipo", "name": "Nome"})
         st.dataframe(cons, hide_index=True, width="stretch")
 

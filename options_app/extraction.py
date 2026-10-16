@@ -49,6 +49,8 @@ price per share (preço médio / average cost / cost basis per share) in the ass
 currency; if only a total cost is shown divide it by quantity; if no cost information
 exists, use null - never guess. Use the broker name shown on the statement. If the same
 ticker appears in several sub-accounts of the same statement, add the quantities.
+If shares are lent out (aluguel de ações / BTC como doador / fully paid securities lending),
+report the lent quantity in `lent`; `quantity` stays the total owned including lent shares.
 Put anything ambiguous (illegible lines, conflicting numbers) in `notes`.
 """
 
@@ -60,6 +62,7 @@ class ExtractedHolding(BaseModel):
     market: Literal["BR", "US"]
     quantity: float
     avg_price: float | None = Field(description="Average cost per share in the asset currency, or null")
+    lent: float = Field(description="Shares currently lent out (aluguel / BTC doador / securities lending), 0 if none")
 
 
 class ExtractedOption(BaseModel):
@@ -134,7 +137,7 @@ def extract_statement(name: str, data: bytes, broker_hint: str | None = None, cl
 def to_portfolio_items(ex: StatementExtraction, broker: str | None = None) -> tuple[list[Holding], list[OptionHolding]]:
     broker = (broker or ex.broker or "").strip()
     holdings = [
-        Holding(h.ticker, h.quantity, h.avg_price, h.market, broker, h.asset_type, h.name)
+        Holding(h.ticker, h.quantity, h.avg_price, h.market, broker, h.asset_type, h.name, h.lent)
         for h in ex.holdings
         if h.quantity
     ]
