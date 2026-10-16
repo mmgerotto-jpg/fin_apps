@@ -36,7 +36,7 @@ carteira vazia).
 | Volatilidade | Histórica: mista (padrão, média de 60 pregões e 1 ano), janela simples ou EWMA |
 | Juro livre de risco | B3: Selic meta (API SGS do Banco Central, série 432). EUA: T-bill de 13 semanas (`^IRX`). Ambos podem ser definidos à mão |
 | Modelo | Árvore binomial CRR (300 passos, exercício americano) com dividend yield. Black-Scholes para gregas e probabilidade |
-| Strikes / vencimentos | EUA: série listada no Yahoo, com compra/venda de mercado como referência. B3: o Yahoo não tem cadeia de opções da B3, então os strikes são teóricos (grade de valores redondos) nos vencimentos mensais (3ª sexta-feira). Confira a série existente no home broker |
+| Strikes / vencimentos e preço de referência | EUA: série listada no Yahoo (meio do book). B3: séries listadas no [opcoes.net.br](https://opcoes.net.br/opcoes/bovespa) (código da opção, último negócio e volume). Se o site não responder, o app usa strikes teóricos (grade de valores redondos, 3ª sexta-feira) e avisa |
 
 O lote padrão é de 100 ações nos dois mercados. Não é recomendação de investimento.
 
@@ -46,6 +46,7 @@ O lote padrão é de 100 ações nos dois mercados. Não é recomendação de in
 python -m options_app.cli ler-extratos extratos/btg.pdf --corretora "BTG Pactual" --salvar
 python -m options_app.cli calls            # sugestões (use --todos para ver todos os strikes)
 python -m options_app.cli puts "PLTR:40, PETR4:34"
+python -m options_app.cli opcoes-net PETR4   # diagnóstico do opcoes.net.br
 python -m options_app.cli preco --spot 37.5 --strike 40 --dias 30 --vol 0.3 --tipo call --juro 0.13
 ```
 

@@ -103,6 +103,31 @@ def cmd_price(args) -> int:
     return 0
 
 
+def cmd_opcoes_net(args) -> int:
+    """Show what opcoes.net.br returns for a ticker (to check the integration)."""
+    import json
+
+    from .opcoes_net import OpcoesNetClient, parse_chain, parse_expirations
+
+    client = OpcoesNetClient()
+    raw = client.fetch(args.ticker)
+    exps = parse_expirations(raw)
+    print(f"Vencimentos ({len(exps)}): {', '.join(e.isoformat() for e in exps[:8])}")
+    if not exps:
+        print(json.dumps(raw, ensure_ascii=False)[:2000])
+        return 1
+    raw = client.fetch(args.ticker, exps[0])
+    rows = (raw.get("data", raw).get("cotacoesOpcoes") or [])
+    print(f"\nPrimeiras linhas brutas de {exps[0]} ({len(rows)} séries):")
+    for r in rows[:5]:
+        print(" ", json.dumps(r, ensure_ascii=False))
+    for kind in ("call", "put"):
+        df = parse_chain(raw, kind)
+        print(f"\n{kind}s interpretadas: {len(df)}")
+        print(df.head(8).to_string(index=False))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="options_app", description="Preço justo de opções (calls cobertas e puts)")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -134,6 +159,10 @@ def build_parser() -> argparse.ArgumentParser:
     u.add_argument("ativos", help="ex.: 'PLTR, PETR4:34:200' (ticker[:preço alvo[:quantidade]])")
     common(u)
     u.set_defaults(func=cmd_puts)
+
+    on = sub.add_parser("opcoes-net", help="diagnóstico: cotações B3 do opcoes.net.br")
+    on.add_argument("ticker")
+    on.set_defaults(func=cmd_opcoes_net)
 
     pr = sub.add_parser("preco", help="preço justo de uma opção")
     pr.add_argument("--spot", type=float, required=True)

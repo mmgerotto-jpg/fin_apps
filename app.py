@@ -111,7 +111,8 @@ COLUMNS = {
     "target_price": ("Preço alvo", "{:,.2f}"), "meets_target": ("Atinge alvo", None),
     "cash_required": ("Caixa necessário", "{:,.0f}"), "market_bid": ("Compra (mercado)", "{:,.2f}"),
     "market_ask": ("Venda (mercado)", "{:,.2f}"), "market_iv": ("Vol. implícita mercado", "{:.0%}"),
-    "strike_source": ("Origem do strike", None),
+    "strike_source": ("Origem do strike", None), "contract": ("Código", None),
+    "market_mid": ("Mercado (ref.)", "{:,.2f}"), "market_volume": ("Volume mercado", "{:,.0f}"),
 }
 
 
@@ -119,10 +120,21 @@ def show(df: pd.DataFrame, cols: list[str], key: str) -> None:
     view = df[[c for c in cols if c in df.columns]].copy()
     if "strike_source" in view:
         view["strike_source"] = view["strike_source"].map({"listado": "listado", "grade": "teórico"})
+    if "market_mid" in view and view["market_mid"].isna().all():
+        view = view.drop(columns=[c for c in ("market_mid", "market_bid", "market_ask", "market_volume", "market_iv")
+                                  if c in view])
     fmt = {COLUMNS[c][0]: COLUMNS[c][1] for c in view.columns if COLUMNS.get(c, (None, None))[1]}
     view = view.rename(columns={c: COLUMNS[c][0] for c in view.columns if c in COLUMNS})
     st.dataframe(view.style.format(fmt, na_rep="–"), width="stretch", hide_index=True)
     st.download_button("Baixar CSV", df.to_csv(index=False).encode(), f"{key}.csv", "text/csv", key=f"dl_{key}")
+
+
+def run_with_notes(fn):
+    """Run an analysis and collect data-source notes (e.g. opcoes.net.br unavailable)."""
+    if hasattr(provider, "reset_notes"):
+        provider.reset_notes()
+    result = fn()
+    return result, list(getattr(provider, "notes", []))
 
 
 def chart(df: pd.DataFrame, key: str) -> None:
@@ -132,7 +144,7 @@ def chart(df: pd.DataFrame, key: str) -> None:
     sub = df[df["ticker"] == t]
     exp = c2.selectbox("Vencimento", sorted(sub["expiry"].unique()), key=f"ce_{key}")
     d = sub[sub["expiry"] == exp].set_index("strike")
-    cols = ["fair_price"] + (["market_bid", "market_ask"] if d["market_bid"].notna().any() else [])
+    cols = ["fair_price"] + (["market_mid"] if d["market_mid"].notna().any() else [])
     st.line_chart(d[cols].rename(columns={c: COLUMNS[c][0] for c in cols}), x_label="strike", y_label="prêmio por ação")
 
 
@@ -281,8 +293,9 @@ with tab_calls:
                                  calls_above_avg_price=above_pm)
         hold = [h for h in p.consolidated() if h.ticker in chosen]
         with st.spinner("Calculando preços justos…"):
-            df, warns = call_opportunities(hold, provider, settings, committed_shares=p.committed_shares())
-        st.session_state["calls"] = (df, warns, settings)
+            (df, warns), notes = run_with_notes(
+                lambda: call_opportunities(hold, provider, settings, committed_shares=p.committed_shares()))
+        st.session_state["calls"] = (df, warns + notes, settings)
     if "calls" in st.session_state:
         df, warns, settings = st.session_state["calls"]
         for w in warns:
@@ -295,12 +308,14 @@ with tab_calls:
             else:
                 show(sug, ["ticker", "currency", "expiry", "dte", "strike", "spot", "fair_price", "premium_pct",
                            "annualized_yield", "prob_exercise", "upside_to_strike", "avg_price",
-                           "return_if_exercised", "contracts", "premium_total", "market_bid", "market_ask"], "calls_sug")
+                           "return_if_exercised", "contracts", "premium_total", "contract", "market_mid",
+                           "market_volume"], "calls_sug")
             st.subheader("Todos os strikes")
             show(df, ["ticker", "currency", "expiry", "dte", "strike", "strike_source", "spot", "fair_price",
                       "fair_per_contract", "premium_pct", "annualized_yield", "prob_exercise", "delta", "theta_day",
                       "model_vol", "upside_to_strike", "return_if_exercised", "contracts", "free_shares",
-                      "premium_total", "market_bid", "market_ask", "market_iv"], "calls_all")
+                      "premium_total", "contract", "market_bid", "market_ask", "market_mid", "market_volume",
+                      "market_iv"], "calls_all")
             chart(df, "calls")
 
 # ======================= PUTS =======================
@@ -317,13 +332,18 @@ with tab_puts:
     if st.button("Calcular puts", type="primary", disabled=not text.strip()):
         settings = base_settings(put_otm_min=otm_p[0] / 100, put_otm_max=otm_p[1] / 100, max_prob_exercise=max_prob_p)
         frames, errors = [], []
-        with st.spinner("Calculando preços justos…"):
+
+        def _run_puts():
             for item in parse_watchlist(text=text):
                 try:
                     frames.append(put_opportunities(normalize_ticker(item.symbol), provider, settings,
                                                     target_price=item.target_price, shares=item.shares))
                 except Exception as exc:
                     errors.append(f"{item.symbol}: {exc}")
+
+        with st.spinner("Calculando preços justos…"):
+            _, notes = run_with_notes(_run_puts)
+        errors += notes
         st.session_state["puts"] = (pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(), errors, settings)
     if "puts" in st.session_state:
         df, errors, settings = st.session_state["puts"]
@@ -337,12 +357,13 @@ with tab_puts:
             else:
                 show(sug, ["ticker", "currency", "expiry", "dte", "strike", "spot", "fair_price", "premium_pct",
                            "annualized_yield", "prob_exercise", "effective_price", "discount_to_spot", "target_price",
-                           "contracts", "cash_required", "premium_total", "market_bid", "market_ask"], "puts_sug")
+                           "contracts", "cash_required", "premium_total", "contract", "market_mid", "market_volume"],
+                     "puts_sug")
             st.subheader("Todos os strikes")
             show(df, ["ticker", "currency", "expiry", "dte", "strike", "strike_source", "spot", "fair_price",
                       "fair_per_contract", "premium_pct", "annualized_yield", "prob_exercise", "delta", "model_vol",
-                      "effective_price", "discount_to_spot", "meets_target", "cash_required", "market_bid",
-                      "market_ask", "market_iv"], "puts_all")
+                      "effective_price", "discount_to_spot", "meets_target", "cash_required", "contract",
+                      "market_bid", "market_ask", "market_mid", "market_volume", "market_iv"], "puts_all")
             chart(df, "puts")
 
 # ======================= CALCULADORA =======================
@@ -387,7 +408,7 @@ with tab_calc:
 st.divider()
 st.caption(
     "Preço justo: árvore binomial (exercício americano) com volatilidade histórica, dividend yield dos últimos 12 meses "
-    "e juro livre de risco (Selic do Banco Central para B3; T-bill de 13 semanas para EUA). Para a B3 não há cotação "
-    "gratuita de opções no Yahoo: os strikes são teóricos (grade de valores redondos) nos vencimentos mensais "
-    "(3ª sexta-feira); confira a série existente no home broker. Não é recomendação de investimento."
+    "e juro livre de risco (Selic do Banco Central para B3; T-bill de 13 semanas para EUA). Referência de mercado: "
+    "Yahoo (EUA, meio do book) e opcoes.net.br (B3, último negócio). Se o opcoes.net.br não responder, os strikes da "
+    "B3 viram teóricos (grade de valores redondos, 3ª sexta-feira). Não é recomendação de investimento."
 )

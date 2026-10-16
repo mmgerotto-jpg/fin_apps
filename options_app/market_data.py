@@ -23,7 +23,8 @@ from typing import Protocol
 import numpy as np
 import pandas as pd
 
-from .markets import BR, US, detect_market, monthly_expirations, yahoo_symbol
+from .markets import BR, US, detect_market, monthly_expirations, normalize_ticker, yahoo_symbol
+from .opcoes_net import OpcoesNetClient
 from .pricing import bs_price
 
 CHAIN_COLUMNS = ["strike", "bid", "ask", "last", "volume", "open_interest", "market_iv", "contract"]
@@ -61,14 +62,27 @@ def fetch_selic(timeout: float = 5.0) -> float | None:
 
 
 class YahooProvider:
-    """Live data from Yahoo Finance through yfinance."""
+    """Live data from Yahoo Finance through yfinance; B3 option quotes from opcoes.net.br."""
 
-    def __init__(self):
+    def __init__(self, b3_options: OpcoesNetClient | None = None):
         import yfinance as yf  # imported lazily so the rest of the app works without it
 
         self._yf = yf
         self._tickers: dict[str, object] = {}
         self._rates: dict[str, float] = {}
+        self.b3 = b3_options if b3_options is not None else OpcoesNetClient()
+        self.notes: list[str] = []  # data-source problems to show the user
+        self._b3_failed: set[str] = set()
+
+    def reset_notes(self) -> None:
+        """Clear data-source notes and retry sources that failed earlier."""
+        self.notes = []
+        self._b3_failed.clear()
+
+    def _b3_note(self, ticker: str, exc: Exception) -> None:
+        if ticker not in self._b3_failed:
+            self._b3_failed.add(ticker)
+            self.notes.append(f"{ticker}: sem cotações do opcoes.net.br ({exc}); usando strikes teóricos")
 
     def _t(self, symbol: str):
         ysym = symbol if symbol.startswith("^") else yahoo_symbol(symbol)
@@ -111,12 +125,28 @@ class YahooProvider:
 
     def expirations(self, symbol: str) -> list[dt.date]:
         if detect_market(symbol) == BR:
+            ticker = normalize_ticker(symbol)
+            if ticker not in self._b3_failed:
+                try:
+                    exps = [e for e in self.b3.expirations(ticker) if e > dt.date.today()]
+                    if exps:
+                        return exps
+                    raise LookupError("nenhum vencimento listado")
+                except Exception as exc:
+                    self._b3_note(ticker, exc)
             return monthly_expirations(dt.date.today())
         return [dt.date.fromisoformat(d) for d in self._t(symbol).options]
 
     def chain(self, symbol: str, expiry: dt.date, kind: str) -> pd.DataFrame | None:
         if detect_market(symbol) == BR:
-            return None  # no free B3 option quotes on Yahoo
+            ticker = normalize_ticker(symbol)
+            if ticker in self._b3_failed:
+                return None
+            try:
+                return self.b3.chain(ticker, expiry, kind)
+            except Exception as exc:
+                self._b3_note(ticker, exc)
+                return None
         oc = self._t(symbol).option_chain(expiry.isoformat())
         raw = oc.calls if kind == "call" else oc.puts
         if raw is None or raw.empty:

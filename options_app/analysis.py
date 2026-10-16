@@ -138,6 +138,8 @@ def price_grid(
                     "market_ask": float(q.ask) if q is not None else np.nan,
                     "market_mid": mkt if mkt is not None else np.nan,
                     "market_iv": mkt_iv if mkt_iv is not None else np.nan,
+                    "market_volume": float(q.volume or 0) if q is not None else np.nan,
+                    "contract": str(q.contract) if q is not None else "",
                     "strike_source": source,
                 }
             )
