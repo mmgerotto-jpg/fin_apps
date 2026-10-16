@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Options Fair Value</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--fg:#1c1f24;--muted:#6b7280;--line:#e3e6ea;--acc:#2563eb;--good:#15803d;--bad:#b91c1c;--warn:#a16207}
+@media (prefers-color-scheme:dark){:root{--bg:#121417;--card:#1b1e23;--fg:#e6e8eb;--muted:#9aa1ab;--line:#2c3138;--acc:#60a5fa;--good:#4ade80;--bad:#f87171;--warn:#facc15}}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--card);flex-wrap:wrap}
+header h1{font-size:17px;margin:0}nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:none;border:0;padding:7px 12px;border-radius:6px;color:var(--muted);cursor:pointer;font:inherit}
+nav button.on{background:var(--bg);color:var(--fg);font-weight:600}
+main{padding:20px;max-width:1300px;margin:auto}section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:15px;margin:0 0 10px}h3{font-size:14px;margin:0}.muted{color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:12px}th:first-child,td:first-child{text-align:left}
+.scroll{overflow-x:auto}
+input,select{font:inherit;padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);width:100%}
+td input{width:100px}
+button.btn{font:inherit;padding:7px 14px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+label{font-size:12px;color:var(--muted);display:block}
+.rich{color:var(--good);font-weight:600}.cheap{color:var(--bad);font-weight:600}.fair{color:var(--muted)}
+.pill{font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--line)}
+.err{color:var(--bad)}.tgt{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;cursor:pointer}
+.drop.over{border-color:var(--acc)}
+.stats{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0 10px;font-size:13px}
+#toast{position:fixed;bottom:16px;right:16px;background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Options Fair Value</h1>
+  <nav id="tabs">
+    <button data-t="portfolio" class="on">Portfolio</button>
+    <button data-t="calls">Covered calls</button>
+    <button data-t="watch">Planned buys (puts)</button>
+    <button data-t="calc">Calculator</button>
+    <button data-t="settings">Settings</button>
+  </nav>
+  <span style="margin-left:auto" class="row"><span class="muted">Data:</span>
+    <select id="provider" style="width:auto"><option value="yahoo">Yahoo Finance (live)</option><option value="demo">Demo (offline)</option></select></span>
+</header>
+<main>
+
+<section id="portfolio" class="on">
+  <div class="card">
+    <h2>Import brokerage statement</h2>
+    <p class="muted">CSV, XLSX or PDF position statements. Needs a symbol/ticker column and a quantity/shares column. Files stay on this computer.</p>
+    <div class="drop" id="drop">Drop statement files here or click to choose<input type="file" id="file" multiple accept=".csv,.txt,.pdf,.xlsx,.xls" hidden></div>
+    <div class="row" style="margin-top:8px"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="merge" style="width:auto"> merge with existing holdings instead of replacing</label></div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h2>Current holdings</h2>
+      <div class="row"><button class="btn" id="addH">+ Add</button><button class="btn pri" id="saveH">Save</button></div></div>
+    <div class="scroll"><table id="htab"></table></div>
+  </div>
+</section>
+
+<section id="calls">
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <div><h2>Covered calls on current holdings</h2>
+      <p class="muted" style="margin:0">Fair value = American binomial price using your chosen volatility estimate. <b>Edge</b> = market mid − fair. RICH means the market pays more than fair value → attractive to sell.</p></div>
+      <button class="btn pri" id="runCalls">Analyze</button></div>
+  </div>
+  <div id="callsOut"></div>
+</section>
+
+<section id="watch">
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h2>Stocks I plan to buy</h2>
+      <div class="row"><button class="btn" id="addW">+ Add</button><button class="btn" id="saveW">Save</button><button class="btn pri" id="runPuts">Analyze puts</button></div></div>
+    <p class="muted">Selling a cash-secured put at your target price gets paid while you wait to buy. Effective buy = strike − premium.</p>
+    <div class="scroll"><table id="wtab"></table></div>
+  </div>
+  <div id="putsOut"></div>
+</section>
+
+<section id="calc">
+  <div class="card"><h2>Single option calculator</h2>
+    <div class="grid">
+      <div><label>Type</label><select id="c_kind"><option>call</option><option>put</option></select></div>
+      <div><label>Spot</label><input id="c_spot" type="number" value="100"></div>
+      <div><label>Strike</label><input id="c_strike" type="number" value="105"></div>
+      <div><label>Days to expiry</label><input id="c_dte" type="number" value="30"></div>
+      <div><label>Volatility %</label><input id="c_vol" type="number" value="25"></div>
+      <div><label>Risk-free %</label><input id="c_rate" type="number" value="4.3"></div>
+      <div><label>Dividend yield %</label><input id="c_div" type="number" value="0"></div>
+      <div><label>Market price (optional)</label><input id="c_mkt" type="number"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn pri" id="runCalc">Price</button></div>
+    <div id="calcOut" style="margin-top:12px"></div>
+  </div>
+</section>
+
+<section id="settings">
+  <div class="card"><h2>Analysis settings</h2>
+    <div class="grid">
+      <div><label>Min days to expiry</label><input data-s="min_dte" type="number" placeholder="20"></div>
+      <div><label>Max days to expiry</label><input data-s="max_dte" type="number" placeholder="60"></div>
+      <div><label>Expiries per stock</label><input data-s="n_expiries" type="number" placeholder="2"></div>
+      <div><label>Fair-vol source</label><select data-s="vol_source">
+        <option value="blend">Blend (30% HV20, 40% HV60, 30% HV120)</option><option value="hv20">HV 20d</option>
+        <option value="hv60">HV 60d</option><option value="hv120">HV 120d</option><option value="hv250">HV 1y</option></select></div>
+      <div><label>Vol override % (blank = use source)</label><input data-s="vol_override" type="number"></div>
+      <div><label>Call OTM min %</label><input data-s="call_otm_min" type="number" placeholder="0"></div>
+      <div><label>Call OTM max %</label><input data-s="call_otm_max" type="number" placeholder="10"></div>
+      <div><label>Put OTM min %</label><input data-s="put_otm_min" type="number" placeholder="0"></div>
+      <div><label>Put OTM max %</label><input data-s="put_otm_max" type="number" placeholder="15"></div>
+      <div><label>Rich/cheap threshold %</label><input data-s="threshold" type="number" placeholder="10"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn pri" id="saveS">Save settings</button></div>
+  </div>
+</section>
+</main>
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let S={holdings:[],watchlist:[],settings:{}};
+const fmt=(v,d=2)=>v==null||isNaN(v)?'—':Number(v).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=(v,d=1)=>v==null||isNaN(v)?'—':(v*100).toFixed(d)+'%';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m,bad){const t=$('#toast');t.textContent=m;t.style.background=bad?'var(--bad)':'';t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',3500)}
+async function api(url,opt={}){const r=await fetch(url,opt);const j=await r.json().catch(()=>({error:r.statusText}));if(!r.ok)throw new Error(j.error||r.statusText);return j}
+const json=(method,body)=>({method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+
+$$('#tabs button').forEach(b=>b.onclick=()=>{$$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));$$('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t))});
+
+function renderH(){
+  $('#htab').innerHTML='<tr><th>Symbol</th><th>Shares</th><th>Contracts (100 sh)</th><th>Cost basis</th><th></th></tr>'+
+  S.holdings.map((h,i)=>`<tr><td><input data-i="${i}" data-k="symbol" value="${esc(h.symbol)}"></td><td><input type="number" data-i="${i}" data-k="quantity" value="${h.quantity??''}"></td>
+  <td>${Math.floor((h.quantity||0)/100)}</td><td><input type="number" data-i="${i}" data-k="cost_basis" value="${h.cost_basis??''}"></td><td><button class="btn" data-del="${i}">✕</button></td></tr>`).join('')||'';
+  if(!S.holdings.length)$('#htab').innerHTML+='<tr><td colspan=5 class="muted">No holdings yet — import a statement or add manually.</td></tr>';
+  $$('#htab input').forEach(e=>e.oninput=()=>S.holdings[e.dataset.i][e.dataset.k]=e.value);
+  $$('#htab [data-del]').forEach(e=>e.onclick=()=>{S.holdings.splice(e.dataset.del,1);renderH()});
+}
+function renderW(){
+  $('#wtab').innerHTML='<tr><th>Symbol</th><th>Shares to buy</th><th>Target buy price</th><th></th></tr>'+
+  S.watchlist.map((w,i)=>`<tr><td><input data-i="${i}" data-k="symbol" value="${esc(w.symbol)}"></td><td><input type="number" data-i="${i}" data-k="shares" value="${w.shares??''}"></td>
+  <td><input type="number" data-i="${i}" data-k="target_price" value="${w.target_price??''}"></td><td><button class="btn" data-del="${i}">✕</button></td></tr>`).join('');
+  $$('#wtab input').forEach(e=>e.oninput=()=>S.watchlist[e.dataset.i][e.dataset.k]=e.value);
+  $$('#wtab [data-del]').forEach(e=>e.onclick=()=>{S.watchlist.splice(e.dataset.del,1);renderW()});
+}
+function renderS(){$$('[data-s]').forEach(e=>e.value=S.settings[e.dataset.s]??(e.tagName==='SELECT'?'blend':''))}
+
+async function load(){S=await api('/api/state');$('#provider').value=S.provider;renderH();renderW();renderS()}
+$('#provider').onchange=async e=>{await api('/api/provider',json('POST',{name:e.target.value}));toast('Data source: '+e.target.selectedOptions[0].text)};
+
+async function upload(files){
+  const fd=new FormData();[...files].forEach(f=>fd.append('file',f));fd.append('mode',$('#merge').checked?'merge':'replace');
+  try{const j=await api('/api/statement',{method:'POST',body:fd});S.holdings=j.holdings;renderH();toast(`Imported ${j.holdings.length} positions`)}catch(e){toast(e.message,1)}
+}
+const drop=$('#drop');drop.onclick=()=>$('#file').click();$('#file').onchange=e=>upload(e.target.files);
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');upload(e.dataTransfer.files)};
+
+$('#addH').onclick=()=>{S.holdings.push({symbol:'',quantity:100});renderH()};
+$('#saveH').onclick=async()=>{try{S.holdings=(await api('/api/holdings',json('PUT',S.holdings))).holdings;renderH();toast('Holdings saved')}catch(e){toast(e.message,1)}};
+$('#addW').onclick=()=>{S.watchlist.push({symbol:'',shares:100,target_price:''});renderW()};
+const saveW=async()=>{S.watchlist=(await api('/api/watchlist',json('PUT',S.watchlist))).watchlist;renderW()};
+$('#saveW').onclick=async()=>{try{await saveW();toast('Watchlist saved')}catch(e){toast(e.message,1)}};
+$('#saveS').onclick=async()=>{$$('[data-s]').forEach(e=>S.settings[e.dataset.s]=e.value);await api('/api/settings',json('PUT',S.settings));toast('Settings saved')};
+
+const vcls=v=>v?.startsWith('RICH')?'rich':v?.startsWith('CHEAP')?'cheap':'fair';
+function header(r,extra=''){
+  const v=r.vols||{};
+  return `<div class="row" style="justify-content:space-between"><h3>${esc(r.symbol)} <span class="muted">spot ${fmt(r.spot)}</span></h3>${extra}</div>
+  <div class="stats muted"><span>Fair vol <b>${pct(r.fair_vol)}</b></span><span>HV20 ${pct(v.hv20)}</span><span>HV60 ${pct(v.hv60)}</span><span>HV120 ${pct(v.hv120)}</span><span>HV1y ${pct(v.hv250)}</span><span>Div yield ${pct(r.div_yield,2)}</span><span>Rate ${pct(r.rate,2)}</span></div>
+  ${r.error?`<div class="err">${esc(r.error)}</div>`:''}`;
+}
+function summarize(rows){const n=rows.filter(r=>r.verdict?.startsWith('RICH')).length,c=rows.filter(r=>r.verdict?.startsWith('CHEAP')).length;return `<span class="pill"><span class="rich">${n} rich</span> · <span class="cheap">${c} cheap</span> · ${rows.length} total</span>`}
+
+$('#runCalls').onclick=async()=>{
+  $('#callsOut').innerHTML='<div class="card muted">Pricing…</div>';
+  try{const {results}=await api('/api/analyze/calls',json('POST',{}));
+  if(!results.length){$('#callsOut').innerHTML='<div class="card muted">No holdings — import a statement first.</div>';return}
+  $('#callsOut').innerHTML=results.map(r=>`<div class="card">${header(r,summarize(r.rows||[]))}
+   <div class="muted" style="margin-bottom:6px">${fmt(r.quantity,0)} shares → ${r.contracts??0} coverable contract(s)</div>
+   ${(r.rows||[]).length?`<div class="scroll"><table><tr><th>Expiry</th><th>DTE</th><th>Strike</th><th>OTM</th><th>Bid</th><th>Ask</th><th>Mid</th><th>Fair</th><th>Edge</th><th>Edge %</th><th>Mkt IV</th><th>Delta</th><th>Ann. yield</th><th>If called</th><th>Premium (all)</th><th>OI</th><th>Verdict</th></tr>
+   ${r.rows.map(x=>`<tr><td>${x.expiry}</td><td>${x.dte}</td><td>${fmt(x.strike)}</td><td>${pct(x.moneyness)}</td><td>${fmt(x.bid)}</td><td>${fmt(x.ask)}</td><td>${fmt(x.market)}</td><td><b>${fmt(x.fair)}</b></td><td>${fmt(x.edge)}</td><td>${pct(x.edge_pct)}</td><td>${pct(x.iv)}</td><td>${fmt(x.delta)}</td><td>${pct(x.yield_annual)}</td><td>${pct(x.called_away_return)}</td><td>${fmt(x.premium_total,0)}</td><td>${fmt(x.oi,0)}</td><td class="${vcls(x.verdict)}">${x.verdict||'—'}</td></tr>`).join('')}</table></div>`:''}
+  </div>`).join('')}catch(e){$('#callsOut').innerHTML=`<div class="card err">${esc(e.message)}</div>`}
+};
+$('#runPuts').onclick=async()=>{
+  $('#putsOut').innerHTML='<div class="card muted">Pricing…</div>';
+  try{await saveW();const {results}=await api('/api/analyze/puts',json('POST',{}));
+  if(!results.length){$('#putsOut').innerHTML='<div class="card muted">Add stocks you plan to buy above.</div>';return}
+  $('#putsOut').innerHTML=results.map(r=>`<div class="card">${header(r,summarize(r.rows||[]))}
+   <div class="muted" style="margin-bottom:6px">Target ${r.target_price?fmt(r.target_price):'—'} · ${fmt(r.shares,0)} shares → ${r.contracts??0} contract(s). Highlighted row = strike nearest your target.</div>
+   ${(r.rows||[]).length?`<div class="scroll"><table><tr><th>Expiry</th><th>DTE</th><th>Strike</th><th>OTM</th><th>Bid</th><th>Ask</th><th>Mid</th><th>Fair</th><th>Edge</th><th>Edge %</th><th>Mkt IV</th><th>P(assign)≈</th><th>Effective buy</th><th>vs spot</th><th>Ann. yield</th><th>Cash needed</th><th>Verdict</th></tr>
+   ${r.rows.map(x=>`<tr class="${x.target_match?'tgt':''}"><td>${x.expiry}</td><td>${x.dte}</td><td>${fmt(x.strike)}</td><td>${pct(x.moneyness)}</td><td>${fmt(x.bid)}</td><td>${fmt(x.ask)}</td><td>${fmt(x.market)}</td><td><b>${fmt(x.fair)}</b></td><td>${fmt(x.edge)}</td><td>${pct(x.edge_pct)}</td><td>${pct(x.iv)}</td><td>${pct(x.prob_assign,0)}</td><td>${fmt(x.effective_buy)}</td><td>${pct(x.discount_vs_spot)}</td><td>${pct(x.yield_annual)}</td><td>${fmt(x.cash_required,0)}</td><td class="${vcls(x.verdict)}">${x.verdict||'theoretical'}</td></tr>`).join('')}</table></div>`:''}
+  </div>`).join('')}catch(e){$('#putsOut').innerHTML=`<div class="card err">${esc(e.message)}</div>`}
+};
+$('#runCalc').onclick=async()=>{
+  const g=k=>$('#c_'+k).value;
+  try{const r=await api('/api/calc',json('POST',{kind:g('kind'),spot:g('spot'),strike:g('strike'),dte:g('dte'),vol:g('vol'),rate:g('rate'),div:g('div'),market:g('mkt')}));
+  $('#calcOut').innerHTML=`<table><tr><th>European (BSM)</th><th>American (binomial)</th><th>Delta</th><th>Gamma</th><th>Vega /1%</th><th>Theta /day</th><th>Rho /1%</th>${r.implied_vol!==undefined?'<th>Implied vol</th><th>Market − fair</th>':''}</tr>
+  <tr><td>${fmt(r.bsm,4)}</td><td><b>${fmt(r.american,4)}</b></td><td>${fmt(r.delta,4)}</td><td>${fmt(r.gamma,4)}</td><td>${fmt(r.vega,4)}</td><td>${fmt(r.theta,4)}</td><td>${fmt(r.rho,4)}</td>${r.implied_vol!==undefined?`<td>${pct(r.implied_vol,2)}</td><td>${fmt(r.edge,4)}</td>`:''}</tr></table>`}catch(e){toast(e.message,1)}
+};
+load();
+</script>
+</body>
+</html>
